@@ -85,4 +85,3 @@ await zip(`./${random_dir}`, `${random_dir}.zip`, {
 fs.rmSync(random_dir, {recursive: true, force:true})
   }
 }
-
