@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDF Lock/Unlock Tool with Bulk Encrypt</title>
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #f3f4f6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .toastify {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: #22c55e;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      z-index: 9999;
+      animation: toastShow 0.5s;
+    }
+    .toastify.error {
+      background: #ef4444;
+    }
+    @keyframes toastShow {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    iframe {
+      border-radius: 0.375rem;
+      border: 1px solid #d1d5db;
+    }
+  </style>
+</head>
+<body>
+  <div class="max-w-2xl w-full bg-white rounded-lg shadow-lg p-6">
+    <h1 class="text-3xl font-extrabold mb-6 text-center text-gray-900">PDF Encrypt / Decrypt Tool</h1>
+
+    <!-- Tabs -->
+    <div class="flex justify-center mb-6 gap-3">
+      <button id="tabEncrypt" class="px-5 py-2 rounded-l font-semibold bg-blue-600 text-white hover:bg-blue-700 focus:outline-none active">Encrypt PDF</button>
+      <button id="tabDecrypt" class="px-5 py-2 font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none">Decrypt PDF</button>
+      <button id="tabBulkEncrypt" class="px-5 py-2 rounded-r font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none">Bulk Encrypt PDFs</button>
+    </div>
+
+    <!-- Form -->
+    <form id="pdfForm" class="space-y-5">
+      <div id="fileInputWrapper" class="flex flex-col">
+        <label for="pdfInput" class="mb-1 font-semibold text-gray-700">Select PDF file(s):</label>
+        <input
+          type="file"
+          id="pdfInput"
+          accept="application/pdf"
+          name="test"
+          class="block file:bg-blue-600 file:text-white file:px-4 file:py-2 file:rounded-lg cursor-pointer border border-gray-300 rounded-md"
+          required
+          single
+        />
+        <small id="fileHelp" class="text-sm text-gray-500 mt-1">Upload a single PDF file</small>
+      </div>
+
+      <div id="passwordWrapper" class="flex flex-col">
+        <label for="password" class="mb-1 font-semibold text-gray-700">Password:</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Enter password"
+          class="px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        id="submitBtn"
+        class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition-colors"
+      >
+        Encrypt PDF
+      </button>
+    </form>
+
+    <!-- Preview Section -->
+    <div id="previewSection" class="hidden mt-6">
+      <h3 class="text-lg font-semibold mb-2 text-gray-800">PDF Preview</h3>
+      <iframe id="pdfPreview" width="100%" height="400" src=""></iframe>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toastContainer"></div>
+
+  <!-- JS -->
+  <script>
+    // Elements & state
+    const tabEncrypt = document.getElementById('tabEncrypt');
+    const tabDecrypt = document.getElementById('tabDecrypt');
+    const tabBulkEncrypt = document.getElementById('tabBulkEncrypt');
+    const pdfForm = document.getElementById('pdfForm');
+    const pdfInput = document.getElementById('pdfInput');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submitBtn');
+    const previewSection = document.getElementById('previewSection');
+    const pdfPreview = document.getElementById('pdfPreview');
+    const fileHelp = document.getElementById('fileHelp');
+    const passwordWrapper = document.getElementById('passwordWrapper');
+    let mode = 'encrypt'; // encrypt / decrypt / bulkEncrypt
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toastify ${type === 'error' ? 'error' : ''}`;
+      toast.textContent = message;
+      document.getElementById('toastContainer').appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Mode switch handler
+    function setMode(newMode) {
+      mode = newMode;
+
+      // Reset form
+      pdfForm.reset();
+      pdfPreview.src = '';
+      previewSection.classList.add('hidden');
+
+      // Reset UI based on mode
+      if (mode === 'encrypt') {
+        tabEncrypt.classList.add('bg-blue-600', 'text-white');
+        tabEncrypt.classList.remove('bg-gray-200', 'text-gray-700');
+        tabDecrypt.classList.remove('bg-green-600', 'text-white');
+        tabDecrypt.classList.add('bg-gray-200', 'text-gray-700');
+        tabBulkEncrypt.classList.remove('bg-purple-600', 'text-white');
+        tabBulkEncrypt.classList.add('bg-gray-200', 'text-gray-700');
+
+        submitBtn.textContent = 'Encrypt PDF';
+        submitBtn.className = 'w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition-colors';
+        pdfInput.removeAttribute('multiple');
+        pdfInput.setAttribute('name', 'test');
+        pdfInput.setAttribute('accept', 'application/pdf');
+        fileHelp.textContent = 'Upload a single PDF file';
+        passwordInput.required = true;
+        passwordWrapper.classList.remove('hidden');
+      } else if (mode === 'decrypt') {
+        tabDecrypt.classList.add('bg-green-600', 'text-white');
+        tabDecrypt.classList.remove('bg-gray-200', 'text-gray-700');
+        tabEncrypt.classList.remove('bg-blue-600', 'text-white');
+        tabEncrypt.classList.add('bg-gray-200', 'text-gray-700');
+        tabBulkEncrypt.classList.remove('bg-purple-600', 'text-white');
+        tabBulkEncrypt.classList.add('bg-gray-200', 'text-gray-700');
+
+        submitBtn.textContent = 'Decrypt PDF';
+        submitBtn.className = 'w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-md transition-colors';
+        pdfInput.removeAttribute('multiple');
+        pdfInput.setAttribute('name', 'test');
+        pdfInput.setAttribute('accept', 'application/pdf');
+        fileHelp.textContent = 'Upload a single PDF file';
+        passwordInput.required = true;
+        passwordWrapper.classList.remove('hidden');
+      } else if (mode === 'bulkEncrypt') {
+        tabBulkEncrypt.classList.add('bg-purple-600', 'text-white');
+        tabBulkEncrypt.classList.remove('bg-gray-200', 'text-gray-700');
+        tabEncrypt.classList.remove('bg-blue-600', 'text-white');
+        tabEncrypt.classList.add('bg-gray-200', 'text-gray-700');
+        tabDecrypt.classList.remove('bg-green-600', 'text-white');
+        tabDecrypt.classList.add('bg-gray-200', 'text-gray-700');
+
+        submitBtn.textContent = 'Encrypt Multiple PDFs';
+        submitBtn.className = 'w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-md transition-colors';
+        pdfInput.setAttribute('multiple', '');
+        pdfInput.setAttribute('name', 'test');
+        pdfInput.setAttribute('accept', 'application/pdf');
+        fileHelp.textContent = 'You can upload up to 100 PDF files (max 100MB each)';
+        passwordInput.required = false;
+        passwordWrapper.classList.add('hidden');
+      }
+    }
+
+    // Initial mode
+    setMode('encrypt');
+
+    // Tab click events
+    tabEncrypt.addEventListener('click', () => setMode('encrypt'));
+    tabDecrypt.addEventListener('click', () => setMode('decrypt'));
+    tabBulkEncrypt.addEventListener('click', () => setMode('bulkEncrypt'));
+
+    // PDF preview for single file modes only
+    pdfInput.addEventListener('change', (e) => {
+      if (mode === 'bulkEncrypt') {
+        previewSection.classList.add('hidden');
+        pdfPreview.src = '';
+        // No preview for multiple files
+        return;
+      }
+      const file = e.target.files[0];
+      if (file && file.type === 'application/pdf') {
+        const url = URL.createObjectURL(file);
+        pdfPreview.src = url;
+        previewSection.classList.remove('hidden');
+      } else {
+        showToast('Please select a valid PDF file.', 'error');
+        pdfPreview.src = '';
+        previewSection.classList.add('hidden');
+      }
+    });
+
+    // Form submission
+    pdfForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const files = pdfInput.files;
+      if (files.length === 0) {
+        showToast('Please select at least one PDF file.', 'error');
+        return;
+      }
+
+      if (mode === 'bulkEncrypt') {
+        // Bulk upload validations
+        if (files.length > 100) {
+          showToast('You can upload up to 100 PDF files only.', 'error');
+          return;
+        }
+        for (const file of files) {
+          if (file.size > 100 * 1024 * 1024) {
+            showToast(`File ${file.name} exceeds 100MB limit.`, 'error');
+            return;
+          }
+          if (file.type !== 'application/pdf') {
+            showToast(`File ${file.name} is not a PDF.`, 'error');
+            return;
+          }
+        }
+      } else {
+        // Single file validations
+        if (files.length > 1) {
+          showToast('Please upload only one PDF file for this mode.', 'error');
+          return;
+        }
+
+        const file = files[0];
+        if (file.type !== 'application/pdf') {
+          showToast('Selected file is not a PDF.', 'error');
+          return;
+        }
+        if (file.size > 100 * 1024 * 1024) {
+          showToast('File exceeds 100MB limit.', 'error');
+          return;
+        }
+
+        if (!passwordInput.value) {
+          showToast('Password is required.', 'error');
+          return;
+        }
+      }
+
+      showToast('Processing...', 'success');
+
+      let apiRoute = '';
+      switch (mode) {
+        case 'encrypt':
+          apiRoute = '/api/v1/upload/encrypt';
+          break;
+        case 'decrypt':
+          apiRoute = '/api/v1/upload/decrypt';
+          break;
+        case 'bulkEncrypt':
+          apiRoute = '/api/v1/upload/bulk/encrypt';
+          break;
+      }
+
+      const formData = new FormData();
+
+      if (mode === 'bulkEncrypt') {
+        // Append multiple files
+        for (const file of files) {
+          formData.append('test', file);
+        }
+      } else {
+        formData.append('test', files[0]);
+      }
+
+      try {
+        const options = {
+          method: 'POST',
+          body: formData,
+          headers: {},
+        };
+
+        if (mode !== 'bulkEncrypt') {
+          options.headers['x-password'] = passwordInput.value;
+        }
+        
+        const response = await fetch(apiRoute, options);
+
+        if (response.status === 200) {
+          const contentDisposition = response.headers.get('Content-Disposition');
+          const isZip = contentDisposition && contentDisposition.includes('zip');
+
+          const blob = await response.blob();
+          const downloadUrl = URL.createObjectURL(blob);
+
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+
+          if (mode === 'encrypt') a.download = 'locked.pdf';
+          else if (mode === 'decrypt') a.download = 'unlocked.pdf';
+          else if (mode === 'bulkEncrypt') a.download = 'locked_pdfs.zip';
+
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+
+          showToast(
+            mode === 'encrypt'
+              ? 'PDF Locked and downloaded.'
+              : mode === 'decrypt'
+              ? 'PDF Unlocked and downloaded.'
+              : 'Bulk PDFs locked and downloaded as ZIP.',
+            'success'
+          );
+          // Reset form & preview
+          pdfForm.reset();
+          previewSection.classList.add('hidden');
+          pdfPreview.src = '';
+        } else {
+          const errorJson = await response.json();
+          const msg = errorJson.messages || 'Operation failed.';
+          showToast(msg, 'error');
+        }
+      } catch (err) {
+        showToast('Server error, please try again.', 'error');
+      }
+    });
+  </script>
+</body>
+</html>

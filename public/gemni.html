@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Protector | Lock & Unlock PDFs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom class for the file dropzone highlight */
+        .drag-over {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        /* Styling for Toast Notifications */
+        #toast-container {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .toast {
+            min-width: 300px;
+            padding: 1rem 1.5rem;
+            color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0%);
+        }
+        .toast-success { background-color: #22c55e; }
+        .toast-error { background-color: #ef4444; }
+
+        /* Simple loading spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border-left-color: #fff;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+
+    <div id="toast-container"></div>
+
+    <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg p-6 sm:p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-800">PDF Protector</h1>
+            <p class="text-slate-500 mt-2">Securely lock or unlock your PDF files in seconds.</p>
+        </div>
+
+        <div class="flex border-b border-slate-200 mb-6">
+            <button id="tab-encrypt" class="tab-btn flex-1 py-3 text-lg font-medium text-blue-600 border-b-2 border-blue-600 transition-colors">
+                🔐 Lock PDF
+            </button>
+            <button id="tab-decrypt" class="tab-btn flex-1 py-3 text-lg font-medium text-slate-500 transition-colors hover:text-slate-700">
+                🔓 Unlock PDF
+            </button>
+        </div>
+
+        <div id="form-container">
+            <div id="panel-encrypt">
+                <form id="encrypt-form" class="space-y-6">
+                    <div id="dropzone-encrypt" class="dropzone">
+                        <input type="file" id="file-input-encrypt" accept="application/pdf" class="hidden">
+                        <div class="text-center">
+                            <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4V12a4 4 0 014-4h12l8 8h12a4 4 0 004-4v-4m0 0l-8-8m0 0H12a4 4 0 00-4 4v4m28 8l-8 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <p class="mt-2 text-sm text-slate-600">
+                                <span class="font-semibold text-blue-600">Click to upload</span> or drag and drop
+                            </p>
+                            <p class="text-xs text-slate-500">PDF files only</p>
+                            <p id="filename-encrypt" class="mt-2 text-sm font-medium text-green-600"></p>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="password-encrypt" class="block text-sm font-medium text-slate-700">Password</label>
+                        <input type="password" id="password-encrypt" name="password" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Enter a strong password">
+                    </div>
+                    <button type="submit" class="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-slate-400">
+                        <span class="btn-text">Lock PDF</span>
+                        <div class="spinner hidden"></div>
+                    </button>
+                </form>
+            </div>
+
+            <div id="panel-decrypt" class="hidden">
+                <form id="decrypt-form" class="space-y-6">
+                     <div id="dropzone-decrypt" class="dropzone">
+                        <input type="file" id="file-input-decrypt" accept="application/pdf" class="hidden">
+                        <div class="text-center">
+                            <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4V12a4 4 0 014-4h12l8 8h12a4 4 0 004-4v-4m0 0l-8-8m0 0H12a4 4 0 00-4 4v4m28 8l-8 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <p class="mt-2 text-sm text-slate-600">
+                                <span class="font-semibold text-blue-600">Click to upload</span> or drag and drop
+                            </p>
+                            <p class="text-xs text-slate-500">Locked PDF files only</p>
+                            <p id="filename-decrypt" class="mt-2 text-sm font-medium text-green-600"></p>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="password-decrypt" class="block text-sm font-medium text-slate-700">Password</label>
+                        <input type="password" id="password-decrypt" name="password" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Enter the file's password">
+                    </div>
+                    <button type="submit" class="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-slate-400">
+                        <span class="btn-text">Unlock PDF</span>
+                        <div class="spinner hidden"></div>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- STATE MANAGEMENT ---
+            let selectedFileEncrypt = null;
+            let selectedFileDecrypt = null;
+
+            // --- DOM ELEMENTS ---
+            const tabEncrypt = document.getElementById('tab-encrypt');
+            const tabDecrypt = document.getElementById('tab-decrypt');
+            const panelEncrypt = document.getElementById('panel-encrypt');
+            const panelDecrypt = document.getElementById('panel-decrypt');
+            const formEncrypt = document.getElementById('encrypt-form');
+            const formDecrypt = document.getElementById('decrypt-form');
+
+            // --- TOAST NOTIFICATION ---
+            const toastContainer = document.getElementById('toast-container');
+            const showToast = (message, type = 'success') => {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.textContent = message;
+                toastContainer.appendChild(toast);
+                
+                setTimeout(() => toast.classList.add('show'), 100);
+
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    toast.addEventListener('transitionend', () => toast.remove());
+                }, 4000);
+            };
+
+            // --- TAB SWITCHING LOGIC ---
+            const switchTab = (activeTab) => {
+                const isEncrypt = activeTab === 'encrypt';
+                tabEncrypt.classList.toggle('text-blue-600', isEncrypt);
+                tabEncrypt.classList.toggle('border-blue-600', isEncrypt);
+                tabEncrypt.classList.toggle('text-slate-500', !isEncrypt);
+                tabEncrypt.classList.toggle('hover:text-slate-700', !isEncrypt);
+                
+                tabDecrypt.classList.toggle('text-green-600', !isEncrypt);
+                tabDecrypt.classList.toggle('border-green-600', !isEncrypt);
+                tabDecrypt.classList.toggle('text-slate-500', isEncrypt);
+                tabDecrypt.classList.toggle('hover:text-slate-700', isEncrypt);
+
+                panelEncrypt.classList.toggle('hidden', !isEncrypt);
+                panelDecrypt.classList.toggle('hidden', isEncrypt);
+            };
+            
+            tabEncrypt.addEventListener('click', () => switchTab('encrypt'));
+            tabDecrypt.addEventListener('click', () => {
+                // Change style for decrypt tab to green
+                tabDecrypt.classList.remove('text-slate-500', 'hover:text-slate-700');
+                tabDecrypt.classList.add('text-green-600', 'border-b-2');
+                tabEncrypt.classList.remove('text-blue-600', 'border-blue-600');
+                tabEncrypt.classList.add('text-slate-500');
+                switchTab('decrypt');
+            });
+
+
+            // --- UI HELPERS ---
+            const handleUIState = (form, isLoading) => {
+                const button = form.querySelector('button[type="submit"]');
+                const btnText = button.querySelector('.btn-text');
+                const spinner = button.querySelector('.spinner');
+
+                button.disabled = isLoading;
+                btnText.classList.toggle('hidden', isLoading);
+                spinner.classList.toggle('hidden', !isLoading);
+            };
+
+            const resetForm = (formId, filenameDisplay) => {
+                document.getElementById(formId).reset();
+                filenameDisplay.textContent = '';
+                if (formId.includes('encrypt')) selectedFileEncrypt = null;
+                if (formId.includes('decrypt')) selectedFileDecrypt = null;
+            };
+
+            // --- FILE HANDLING & DRAG-DROP LOGIC ---
+            const setupDropzone = (dropzoneId, fileInputId, filenameId, fileStateSetter) => {
+                const dropzone = document.getElementById(dropzoneId);
+                const fileInput = document.getElementById(fileInputId);
+                const filenameDisplay = document.getElementById(filenameId);
+
+                const handleFile = (file) => {
+                    if (file && file.type === 'application/pdf') {
+                        fileStateSetter(file);
+                        filenameDisplay.textContent = `Selected: ${file.name}`;
+                        showToast('File selected successfully!', 'success');
+                    } else {
+                        showToast('Invalid file type. Please select a PDF.', 'error');
+                        fileStateSetter(null);
+                        filenameDisplay.textContent = '';
+                    }
+                };
+
+                dropzone.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
+
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropzone.addEventListener(eventName, e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    });
+                });
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropzone.addEventListener(eventName, () => dropzone.classList.add('drag-over'));
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropzone.addEventListener(eventName, () => dropzone.classList.remove('drag-over'));
+                });
+
+                dropzone.addEventListener('drop', e => {
+                    handleFile(e.dataTransfer.files[0]);
+                });
+
+                // Add base styling to dropzone
+                dropzone.classList.add('mt-1', 'flex', 'justify-center', 'px-6', 'pt-5', 'pb-6', 'border-2', 'border-slate-300', 'border-dashed', 'rounded-md', 'cursor-pointer', 'transition-colors');
+            };
+
+            setupDropzone('dropzone-encrypt', 'file-input-encrypt', 'filename-encrypt', (file) => { selectedFileEncrypt = file; });
+            setupDropzone('dropzone-decrypt', 'file-input-decrypt', 'filename-decrypt', (file) => { selectedFileDecrypt = file; });
+
+
+            // --- API SUBMISSION LOGIC ---
+            const handleFormSubmit = async (e, operation) => {
+                e.preventDefault();
+                const isEncrypt = operation === 'encrypt';
+                const form = isEncrypt ? formEncrypt : formDecrypt;
+                const selectedFile = isEncrypt ? selectedFileEncrypt : selectedFileDecrypt;
+                const password = document.getElementById(`password-${operation}`).value;
+                const filenameDisplay = document.getElementById(`filename-${operation}`);
+                const apiUrl = `/api/v1/upload/${operation}`;
+
+                // Validation
+                if (!selectedFile) {
+                    showToast('Please select a PDF file first.', 'error');
+                    return;
+                }
+                if (!password) {
+                    showToast('Password cannot be empty.', 'error');
+                    return;
+                }
+                
+                handleUIState(form, true);
+
+                const formData = new FormData();
+                formData.append('test', selectedFile); // 'pdfFile' must match your multer field name
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'x-password': password
+                        },
+                        body: formData
+                    });
+
+                    if (response.status === 400) { // Specific check for your error case
+                        const errorData = await response.json();
+                        throw new Error(errorData.messages || 'An unknown error occurred.');
+                    }
+                    
+                    if (!response.ok) { // General network/server error
+                        throw new Error(`Server error: ${response.statusText}`);
+                    }
+
+                    // Handle successful file download
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    
+                    const originalName = selectedFile.name.replace('.pdf', '');
+                    a.download = isEncrypt ? `${originalName}-locked.pdf` : `${originalName}-unlocked.pdf`;
+                    
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+
+                    showToast(`PDF ${isEncrypt ? 'locked' : 'unlocked'} successfully!`, 'success');
+                    resetForm(form.id, filenameDisplay);
+
+                } catch (error) {
+                    showToast(error.message, 'error');
+                } finally {
+                    handleUIState(form, false);
+                }
+            };
+            
+            formEncrypt.addEventListener('submit', (e) => handleFormSubmit(e, 'encrypt'));
+            formDecrypt.addEventListener('submit', (e) => handleFormSubmit(e, 'decrypt'));
+        });
+    </script>
+</body>
+</html>

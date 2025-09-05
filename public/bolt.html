@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Crypto Pro - Advanced Document Security</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen font-inter">
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Navigation -->
+    <nav class="relative z-10 px-6 py-4 backdrop-blur-sm bg-black/20">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-white text-xl font-bold">PDF Crypto Pro</span>
+                    <div class="text-xs text-purple-300">Advanced Document Security</div>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center space-x-6">
+                <span class="text-green-400 text-sm flex items-center">
+                    <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                    Server Online
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="relative px-6 py-8 md:py-16">
+        <div class="max-w-6xl mx-auto">
+            <!-- Hero Title -->
+            <div class="text-center mb-12">
+                <div class="floating-element">
+                    <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+                        Advanced PDF 
+                        <span class="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+                            Security Suite
+                        </span>
+                    </h1>
+                </div>
+                <p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto">
+                    Professional-grade PDF encryption and decryption with support for single files and bulk operations
+                </p>
+            </div>
+
+            <!-- Operation Selection -->
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
+                <button id="encrypt-btn" class="operation-card glass-card p-6 rounded-2xl text-white hover:scale-105 transition-all duration-300 border border-purple-500/30 hover:border-purple-400/50">
+                    <div class="flex flex-col items-center space-y-4">
+                        <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="text-xl font-bold mb-2">Encrypt PDF</h3>
+                            <p class="text-gray-300 text-sm">Secure single PDF with password protection</p>
+                        </div>
+                    </div>
+                </button>
+
+                <button id="decrypt-btn" class="operation-card glass-card p-6 rounded-2xl text-white hover:scale-105 transition-all duration-300 border border-green-500/30 hover:border-green-400/50">
+                    <div class="flex flex-col items-center space-y-4">
+                        <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="text-xl font-bold mb-2">Decrypt PDF</h3>
+                            <p class="text-gray-300 text-sm">Remove password protection from PDF</p>
+                        </div>
+                    </div>
+                </button>
+
+                <button id="bulk-encrypt-btn" class="operation-card glass-card p-6 rounded-2xl text-white hover:scale-105 transition-all duration-300 border border-cyan-500/30 hover:border-cyan-400/50">
+                    <div class="flex flex-col items-center space-y-4">
+                        <div class="w-16 h-16 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="text-xl font-bold mb-2">Bulk Encrypt</h3>
+                            <p class="text-gray-300 text-sm">Encrypt up to 100 PDFs at once</p>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Main Interface -->
+            <div id="main-interface" class="glass-card p-8 md:p-12 rounded-3xl max-w-4xl mx-auto opacity-0 scale-95 transition-all duration-700">
+                <div class="text-center mb-8">
+                    <h2 id="interface-title" class="text-3xl md:text-4xl font-bold text-white mb-3">Select Operation</h2>
+                    <p id="interface-subtitle" class="text-gray-300 text-lg">Choose an operation to secure your PDF documents</p>
+                </div>
+
+                <!-- Single File Drop Zone -->
+                <div id="single-drop-zone" class="border-2 border-dashed border-gray-600 rounded-2xl p-8 md:p-12 text-center transition-all duration-300 cursor-pointer hover:border-purple-400 hover:bg-purple-500/5 hidden">
+                    <div class="flex flex-col items-center">
+                        <div class="w-20 h-20 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center mb-6 shadow-2xl">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-white mb-3">Drop your PDF here</h3>
+                        <p class="text-gray-400 mb-4 text-lg">or click to browse files</p>
+                        <div class="flex items-center space-x-2 text-sm text-gray-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>Only PDF files • Max 100MB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bulk File Drop Zone -->
+                <div id="bulk-drop-zone" class="border-2 border-dashed border-gray-600 rounded-2xl p-8 md:p-12 text-center transition-all duration-300 cursor-pointer hover:border-cyan-400 hover:bg-cyan-500/5 hidden">
+                    <div class="flex flex-col items-center">
+                        <div class="w-20 h-20 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center mb-6 shadow-2xl">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-white mb-3">Drop multiple PDFs here</h3>
+                        <p class="text-gray-400 mb-4 text-lg">or click to browse files</p>
+                        <div class="flex flex-col items-center space-y-2 text-sm text-gray-500">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>Up to 100 PDF files • Each max 100MB</span>
+                            </div>
+                            <span>Returns encrypted ZIP file</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Inputs -->
+                <input type="file" id="single-file-input" accept=".pdf" class="hidden">
+                <input type="file" id="bulk-file-input" accept=".pdf" multiple class="hidden">
+
+                <!-- Single File Display -->
+                <div id="single-file-display" class="hidden mb-8">
+                    <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center shadow-lg">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p id="single-file-name" class="text-white font-semibold text-lg"></p>
+                                    <p id="single-file-size" class="text-gray-400"></p>
+                                </div>
+                            </div>
+                            <button id="remove-single-file" class="text-gray-400 hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-red-500/10">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bulk Files Display -->
+                <div id="bulk-files-display" class="hidden mb-8">
+                    <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-white font-semibold">Selected Files</h3>
+                                    <p id="bulk-files-count" class="text-gray-400 text-sm"></p>
+                                </div>
+                            </div>
+                            <button id="remove-bulk-files" class="text-gray-400 hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-red-500/10">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="bulk-files-list" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar"></div>
+                    </div>
+                </div>
+
+                <!-- Password Section -->
+                <div id="password-section" class="hidden mb-8">
+                    <div class="bg-slate-800/30 rounded-2xl p-6 border border-slate-700/30">
+                        <label for="password" class="block text-lg font-semibold text-white mb-3">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                                </svg>
+                                <span>Security Password</span>
+                            </div>
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="password" class="w-full px-4 py-4 bg-slate-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-lg" placeholder="Enter a strong password">
+                            <button type="button" id="toggle-password" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors">
+                                <svg id="eye-closed" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.5 8.5m1.378 1.378l.85.85m5.764-5.764L21 4m-4.242 4.242L21 4m0 0L17 8"></path>
+                                </svg>
+                                <svg id="eye-open" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="mt-3 flex items-center space-x-2 text-sm text-gray-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>Minimum 4 characters recommended</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Process Button -->
+                <button id="process-btn" class="w-full px-8 py-4 bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500 text-white font-bold text-lg rounded-xl hover:from-purple-600 hover:via-pink-600 hover:to-cyan-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl hover:shadow-purple-500/25 hidden">
+                    <span id="process-btn-text">Process File</span>
+                    <div id="process-btn-loader" class="hidden flex items-center justify-center">
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                        <span id="process-btn-loader-text">Processing...</span>
+                    </div>
+                </button>
+
+                <!-- Progress Section -->
+                <div id="progress-section" class="hidden mt-6">
+                    <div class="bg-slate-800/30 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-white font-medium">Processing Progress</span>
+                            <span id="progress-percentage" class="text-purple-400 font-bold">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-3">
+                            <div id="progress-bar" class="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <p id="progress-text" class="text-gray-400 text-sm mt-2">Initializing...</p>
+                    </div>
+                </div>
+
+                <!-- Reset Button -->
+                <button id="reset-btn" class="w-full mt-6 px-6 py-3 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded-xl hover:border-gray-500 hidden">
+                    <div class="flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span>Start Over</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="px-6 py-16 md:py-24">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">Advanced Security Features</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">Enterprise-grade PDF protection with cutting-edge encryption technology</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="glass-card p-6 rounded-2xl hover:scale-105 transition-all duration-300 text-center">
+                    <div class="w-14 h-14 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">AES Encryption</h3>
+                    <p class="text-gray-300 text-sm">Military-grade encryption standards</p>
+                </div>
+                
+                <div class="glass-card p-6 rounded-2xl hover:scale-105 transition-all duration-300 text-center">
+                    <div class="w-14 h-14 bg-gradient-to-r from-green-400 to-emerald-400 rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Lightning Fast</h3>
+                    <p class="text-gray-300 text-sm">Process files in seconds</p>
+                </div>
+                
+                <div class="glass-card p-6 rounded-2xl hover:scale-105 transition-all duration-300 text-center">
+                    <div class="w-14 h-14 bg-gradient-to-r from-purple-400 to-pink-400 rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Bulk Processing</h3>
+                    <p class="text-gray-300 text-sm">Handle up to 100 files at once</p>
+                </div>
+                
+                <div class="glass-card p-6 rounded-2xl hover:scale-105 transition-all duration-300 text-center">
+                    <div class="w-14 h-14 bg-gradient-to-r from-orange-400 to-red-400 rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Cross Platform</h3>
+                    <p class="text-gray-300 text-sm">Works on all devices seamlessly</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
