@@ -19,6 +19,9 @@ if (err) {
     }
 
     if (!req.files || req.files.length < 2) {
+      req.files.forEach((file) => {
+        fs.unlinkSync(file.path)
+      })
       return res.status(400).json({ message: "Minimum 2 pdf files are required for merge it!" });
     }
     let req_path_path = [];

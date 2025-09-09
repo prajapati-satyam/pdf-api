@@ -14,7 +14,7 @@ const encrypt_pdf = (req, res) => {
             message: "passoword is requried to lock pdf"
         })
     }
-    console.log(password);
+    // console.log(password);
     upload.single('test')(req, res, async(err) => {
         if (err) {
             console.log(err.code)

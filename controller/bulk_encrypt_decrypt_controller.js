@@ -83,14 +83,7 @@ if (fs.existsSync(zipPath) && cleanupNeeded) {
             return res.json({
                 message: err.message
             })
-        } finally {
-      if (fs.existsSync(`./${random_dir}`)) {
-        fs.rmSync(`./${random_dir}`, { recursive: true, force: true });
-      }
-      if (fs.existsSync(`./${random_dir}.zip`)) {
-        fs.unlinkSync(`./${random_dir}.zip`, { recursive: true, force: true });
-      }
-    }
+        }
     req.files.forEach((file) => {
         if(fs.existsSync(file)) {
             fs.unlinkSync(file);
