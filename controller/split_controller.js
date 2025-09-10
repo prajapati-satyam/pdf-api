@@ -34,85 +34,129 @@ const split_pdf_controllter = async (req, res) => {
             }
             // for range parameter
             if (choice === 'range') {
-const arr = range.split(',').map(Number);
-            if (choice && choice === 'range' && arr.length === 2 && arr[0] < arr[1] && arr[1] > arr[0]) {
-                if(!req.file) {
-                    return res.json({
-                        message: "pdf file is requied to perfome operation"
-                    })
-                }
-                // console.log(arr);
-                const split_pdf_result = await split_pdf(`${req.file.path}`, arr, undefined, undefined);
-                if (split_pdf_result.path && split_pdf_result.success === true) {
-                    return res.status(200).download(split_pdf_result.path, 'split.zip', (err) => {
-                           fs.unlinkSync(split_pdf_result.path);
-                           fs.unlinkSync(req.file.path);
-                           res.on('close', ()=> {
-                            if (fs.existsSync(split_pdf_result.path)) {
-                                  fs.unlinkSync(split_pdf_result.path);
-                            }
-                            if (fs.existsSync(req.file.path)) {
-                                fs.unlinkSync(req.file.path);
-                            }
-                           })
-                    })
-                } else {
-                            if (fs.existsSync(req.file.path)) {
-                                fs.unlinkSync(req.file.path);
-                            }
-                    return res.status(400).json({
-                        message: "unable to split your pdf, make sure you send pdf file and it is not encrypted and all parameters are correct"
-                    })
-                }
-            } else {
-                return res.json({
-                    message: "something wrong with range parameter, check it and try again"
-                })
-            }
-        }
-        // for page numbers parameter
-        if (choice && choice === 'pagenumbers' && pageNumbers) {
-            const arr = pageNumbers.split(',').map(Number);
-            if (!req.file) {
-                return res.json({
-                    message: "file is required to perfome operation"
-                })
-            }
-            const zip_pdf_path = await split_pdf(req.file.path, undefined, arr, undefined);
-            if (zip_pdf_path.path && zip_pdf_path.success === true) {
-                  return res.status(200).download(`${zip_pdf_path.path}`, "split.zip", (err) => {
-                    if (err) {
-                        console.log("err in range pageNumbers : ", err);
+                const arr = range.split(',').map(Number);
+                if (choice && choice === 'range' && arr.length === 2 && arr[0] < arr[1] && arr[1] > arr[0]) {
+                    if (!req.file) {
+                        return res.json({
+                            message: "pdf file is requied to perfome operation"
+                        })
                     }
-                    if(fs.existsSync(zip_pdf_path.path)) {
-                          fs.unlinkSync(zip_pdf_path.path)
-                          console.log("pagenumbers zip file deleted");
+                    // console.log(arr);
+                    const split_pdf_result = await split_pdf(`${req.file.path}`, arr, undefined, undefined);
+                    if (split_pdf_result.path && split_pdf_result.success === true) {
+                        return res.status(200).download(split_pdf_result.path, 'split.zip', (err) => {
+                            fs.unlinkSync(split_pdf_result.path);
+                            fs.unlinkSync(req.file.path);
+                            res.on('close', () => {
+                                if (fs.existsSync(split_pdf_result.path)) {
+                                    fs.unlinkSync(split_pdf_result.path);
+                                }
+                                if (fs.existsSync(req.file.path)) {
+                                    fs.unlinkSync(req.file.path);
+                                }
+                            })
+                        })
+                    } else {
+                        if (fs.existsSync(req.file.path)) {
+                            fs.unlinkSync(req.file.path);
+                        }
+                        return res.status(400).json({
+                            message: "unable to split your pdf, make sure you send pdf file and it is not encrypted and all parameters are correct"
+                        })
+                    }
+                } else {
+                    return res.json({
+                        message: "something wrong with range parameter, check it and try again"
+                    })
+                }
+            }
+            // for page numbers parameter
+            if (choice && choice === 'pagenumbers' && pageNumbers) {
+                const arr = pageNumbers.split(',').map(Number);
+                if (!req.file) {
+                    return res.json({
+                        message: "file is required to perfome operation"
+                    })
+                }
+                const zip_pdf_path = await split_pdf(req.file.path, undefined, arr, undefined);
+                if (zip_pdf_path.path && zip_pdf_path.success === true) {
+                    return res.status(200).download(`${zip_pdf_path.path}`, "split.zip", (err) => {
+                        if (err) {
+                            console.log("err in range pageNumbers : ", err);
+                        }
+                        if (fs.existsSync(zip_pdf_path.path)) {
+                            fs.unlinkSync(zip_pdf_path.path)
+                            console.log("pagenumbers zip file deleted");
                         }
                         if (req.file.path) {
-                        fs.unlinkSync(req.file.path);
-                        console.log("pagenumbers tmp file deleted");
+                            fs.unlinkSync(req.file.path);
+                            console.log("pagenumbers tmp file deleted");
                         }
-                    res.on("close", ()=> {
-                        if (fs.existsSync(zip_pdf_path.path)) {
-                              fs.unlinkSync(zip_pdf_path.path)
+                        res.on("close", () => {
+                            if (fs.existsSync(zip_pdf_path.path)) {
+                                fs.unlinkSync(zip_pdf_path.path)
+                            }
+                            if (fs.existsSync(req.file.path)) {
+                                fs.unlinkSync(req.file.path)
+                            }
+                        })
+                    })
+                } else {
+                    if (fs.existsSync(req.file.path)) {
+                        fs.unlinkSync(req.file.path)
+                    }
+                    if (fs.existsSync(zip_pdf_path.path)) {
+                        fs.unlinkSync(zip_pdf_path.path)
+                    }
+                    return res.status(400).json({
+                        message: "something wrong with pdf file and your parameter"
+                    })
+                }
+            }
+            if (choice && choice === 'splitall' && (splitAll === true || splitAll === 'true')) {
+                if (!req.file) {
+                    return res.json({
+                        message: "file is required to perfome operation"
+                    })
+                }
+                const pdf_path = await split_pdf(`${req.file.path}`, undefined, undefined, true);
+                if (pdf_path.path && pdf_path.success === true) {
+                    return res.status(200).download(`${pdf_path.path}`, "split.zip", (err) => {
+                        if (err) {
+                            console.log("err in split all : ", err);
                         }
                         if (fs.existsSync(req.file.path)) {
-                              fs.unlinkSync(req.file.path)
+                            fs.unlinkSync(req.file.path)
                         }
+                        if (fs.existsSync(pdf_path.path)) {
+                            fs.unlinkSync(pdf_path.path)
+                        }
+                        res.on("close", () => {
+                            if (fs.existsSync(req.file.path)) {
+                                fs.unlinkSync(req.file.path)
+                            }
+                            if (fs.existsSync(pdf_path.path)) {
+                                fs.unlinkSync(pdf_path.path)
+                            }
+                        })
                     })
-                  })
+
+                } else {
+                    if (fs.existsSync(req.file.path)) {
+                        fs.unlinkSync(req.file.path)
+                    }
+                    return res.json({
+                        message: "unable to split your pdf and parameter, check you pdf and try again"
+                    })
+                }
             } else {
-                if(fs.existsSync(req.file.path)) {
-                   fs.unlinkSync(req.file.path)
+                if (fs.existsSync(req.file.path)) {
+                    fs.unlinkSync(req.file.path)
                 }
-                if (fs.existsSync(zip_pdf_path.path)) {
-                    fs.unlinkSync(zip_pdf_path.path)
-                }
-                return res.status(400).json({
-                    message: "something wrong with pdf file and your parameter"
+                return res.json({
+                    message: "something wrong with splitall parameter"
                 })
             }
-        }
         })
     } catch (err) {
         console.log("unable to save file, mutlter error : ", err);
