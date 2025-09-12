@@ -33,6 +33,9 @@ if (err) {
         const final_merge_pdf_path = await merge_pdf([...req_path_path]);
         if (final_merge_pdf_path.path && final_merge_pdf_path.success === true) {
              return res.status(200).download(final_merge_pdf_path.path, 'merge.pdf', (err) => {
+              if(err) {
+                console.log("erorr in merge pdf conrtoller : ", err)
+              }
                 // console.log("file deleted start");
                 fs.unlinkSync(final_merge_pdf_path.path);
                 // console.log("file deleted end ");

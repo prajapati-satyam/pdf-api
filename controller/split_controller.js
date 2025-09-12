@@ -45,6 +45,9 @@ const split_pdf_controllter = async (req, res) => {
                     const split_pdf_result = await split_pdf(`${req.file.path}`, arr, undefined, undefined);
                     if (split_pdf_result.path && split_pdf_result.success === true) {
                         return res.status(200).download(split_pdf_result.path, 'split.zip', (err) => {
+                            if (err) {
+                                console.log("error in split pdf controller range parameter : ", err)
+                            }
                             fs.unlinkSync(split_pdf_result.path);
                             fs.unlinkSync(req.file.path);
                             res.on('close', () => {
@@ -82,7 +85,7 @@ const split_pdf_controllter = async (req, res) => {
                 if (zip_pdf_path.path && zip_pdf_path.success === true) {
                     return res.status(200).download(`${zip_pdf_path.path}`, "split.zip", (err) => {
                         if (err) {
-                            console.log("err in range pageNumbers : ", err);
+                            console.log("err in split pdf controller pageNumbers : ", err);
                         }
                         if (fs.existsSync(zip_pdf_path.path)) {
                             fs.unlinkSync(zip_pdf_path.path)
@@ -113,6 +116,8 @@ const split_pdf_controllter = async (req, res) => {
                     })
                 }
             }
+
+            // for split all pdf pages in to individual pdfs
             if (choice && choice === 'splitall' && (splitAll === true || splitAll === 'true')) {
                 if (!req.file) {
                     return res.json({
