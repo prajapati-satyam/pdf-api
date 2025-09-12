@@ -60,10 +60,12 @@ if (err) {
         }
 
     } catch (err) {
+      if (result.path) {
         if (fs.existsSync(result.path)) {
                 fs.unlinkSync(result.path);
                 console.log("tempory created file deleted");
             }
+          }
         console.log("error in merge file controler : ", err);
         return res.status(400).json({
             message: "something went wrong, make sure you send pdf files and they are not encrpted"
