@@ -28,9 +28,11 @@ if (err) {
     req.files.forEach((file) => {
         req_path_path.push(file.path)
     });
+    let result;
     console.log(req_path_path);
     try {
         const final_merge_pdf_path = await merge_pdf([...req_path_path]);
+        result = final_merge_pdf_path;
         if (final_merge_pdf_path.path && final_merge_pdf_path.success === true) {
              return res.status(200).download(final_merge_pdf_path.path, 'merge.pdf', (err) => {
               if(err) {
@@ -58,8 +60,8 @@ if (err) {
         }
 
     } catch (err) {
-        if (fs.existsSync(final_merge_pdf_path.path)) {
-                fs.unlinkSync(final_merge_pdf_path.path);
+        if (fs.existsSync(result.path)) {
+                fs.unlinkSync(result.path);
                 console.log("tempory created file deleted");
             }
         console.log("error in merge file controler : ", err);
