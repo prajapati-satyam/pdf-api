@@ -42,6 +42,9 @@ const encrypt_pdf = (req, res) => {
             const lock_pdf = await encrypt_pdf_file(req.file.path, password);
             if (lock_pdf) {
                 return res.download(path.join(__dirname ,'../tmp/encrypt', req.file.filename), 'locked.pdf', (err) => {
+                    if (err) {
+                        console.log("error in lock pdf : ", err);
+                    }
                     // delete original file
                     console.log("original file deleted starting : ");
                     fs.unlinkSync(req.file.path);
