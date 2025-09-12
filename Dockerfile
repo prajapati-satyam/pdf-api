@@ -4,6 +4,8 @@ RUN apt-get update
 
 RUN apt-get install -y qpdf
 
+WORKDIR /app
+
 COPY . .
 
 RUN npm install
