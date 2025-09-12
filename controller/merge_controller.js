@@ -60,6 +60,9 @@ if (err) {
         }
 
     } catch (err) {
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path)
+      }
       if (result.path) {
         if (fs.existsSync(result.path)) {
                 fs.unlinkSync(result.path);
