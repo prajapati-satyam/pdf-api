@@ -70,6 +70,7 @@ const encrypt_pdf = (req, res) => {
             fs.unlinkSync(req.file.path);
             console.log("original file deleted");
             console.log("error in encryptfile controller : ", err);
+            console.log("error in encryptfile controller : ", err.message);
             res.json({
                 message: "Unable to lock your pdf"
             })
