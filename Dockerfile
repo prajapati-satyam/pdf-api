@@ -1,8 +1,8 @@
 FROM node:18-slim
 
-RUN sudo apt-get update
+RUN apt-get update
 
-RUN sudo apt-get install -y qpdf
+RUN apt-get install -y qpdf
 
 COPY . .
 
