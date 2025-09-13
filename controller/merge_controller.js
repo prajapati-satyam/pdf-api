@@ -18,13 +18,18 @@ if (err) {
       }
       return res.status(400).json({ message: err.message });
     }
-
-    if (!req.files || req.files.length < 2) {
-      for (const file of req.files) {
-     fs.unlinkSync(file.path)
-      }
-      return res.status(400).json({ message: "Minimum 2 pdf files are required for merge it!" });
+if (!req.files || req.files.length < 2) {
+  if (req.files && req.files.length > 0) {
+    for (const file of req.files) {
+      fs.unlinkSync(file.path);
     }
+  }
+
+  return res.status(400).json({
+    message: "Minimum 2 pdf files are required for merge it!",
+  });
+}
+
     // check each pdf is it is locked
     for (const file of req.files) {
   const locked = await isPdfLocked(file.path);
