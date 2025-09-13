@@ -2,6 +2,7 @@ import multer from "multer";
 import upload from "../middleware/multer.js";
 import { split_pdf } from "../utils/split_merge_pdf.js";
 import fs from 'fs'
+import isPdfLocked from "../utils/is_pdf_locked.js"
 
 const split_pdf_controllter = async (req, res) => {
     const choice = req.headers["choice"];
@@ -31,6 +32,19 @@ const split_pdf_controllter = async (req, res) => {
                     });
                 }
                 return res.status(400).json({ message: err.message });
+            }
+           // check for locked pdf
+           if (!req.file) {
+ return res.status(400).json({
+    message: "pdf requied to perfome operation"
+ })
+           }
+            const isLocked = await isPdfLocked(req.file.path);
+            if(isLocked) {
+                fs.unlinkSync(req.file.path)
+            return res.status(400).json({
+                message: "can't perfome action on locked pdf!"
+            })
             }
             // for range parameter
             if (choice === 'range') {

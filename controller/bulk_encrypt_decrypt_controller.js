@@ -10,6 +10,7 @@ import encrypt_pdf_file_bulk from "../utils/encrypt_decrypt_bulk_pdf.js";
 import genrate_random_direcory from "../utils/genarte_random_directory.js";
 import fs from "fs"
 import { zip, COMPRESSION_LEVEL } from 'zip-a-folder';
+import isPdfLocked from "../utils/is_pdf_locked.js"
 
 const bulk_pdf_encrypt = async (req, res) => {
     const password = req.headers['x-password'];
@@ -39,6 +40,21 @@ const bulk_pdf_encrypt = async (req, res) => {
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({ message: 'No files uploaded!' });
         }
+        // check for locked pdf
+           for (const file of req.files) {
+  const locked = await isPdfLocked(file.path);
+  if (locked) {
+    for (const f of req.files) {
+      if (fs.existsSync(f.path)) {
+        fs.unlinkSync(f.path);
+      }
+    }
+
+    return res.status(400).json({
+      message: "PDF is locked, can't perform operation"
+    });
+  }
+}
         const random_dir = genrate_random_direcory();
         const zipPath = `./${random_dir}.zip`;
         let cleanupNeeded = true;

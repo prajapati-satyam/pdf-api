@@ -1,6 +1,7 @@
 import upload from "../middleware/multer.js"
 import { merge_pdf } from "../utils/split_merge_pdf.js";
-import fs from 'fs'
+import fs from 'fs';
+import isPdfLocked from "../utils/is_pdf_locked.js"
 
 const merge_pdf_controller = async (req,res) => {
 upload.array('test')(req,res, async(err) => {
@@ -24,15 +25,30 @@ if (err) {
       })
       return res.status(400).json({ message: "Minimum 2 pdf files are required for merge it!" });
     }
+    // check each pdf is it is locked
+    for (const file of req.files) {
+  const locked = await isPdfLocked(file.path);
+  if (locked) {
+    for (const f of req.files) {
+      if (fs.existsSync(f.path)) {
+        fs.unlinkSync(f.path);
+      }
+    }
+
+    return res.status(400).json({
+      message: "PDF is locked, can't perform merge operation"
+    });
+  }
+}
+
+
     let req_path_path = [];
     req.files.forEach((file) => {
         req_path_path.push(file.path)
     });
-    let result;
     console.log(req_path_path);
     try {
         const final_merge_pdf_path = await merge_pdf([...req_path_path]);
-        result = final_merge_pdf_path;
         if (final_merge_pdf_path.path && final_merge_pdf_path.success === true) {
              return res.status(200).download(final_merge_pdf_path.path, 'merge.pdf', (err) => {
               if(err) {
@@ -60,15 +76,13 @@ if (err) {
         }
 
     } catch (err) {
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path)
-      }
-      if (result.path) {
-        if (fs.existsSync(result.path)) {
-                fs.unlinkSync(result.path);
-                console.log("tempory created file deleted");
-            }
-          }
+      if (req.files && req.files.length > 0) {
+        req.files.forEach((file) => {
+ if (file.path && fs.existsSync(file.path)) {
+     fs.unlinkSync(file.path);
+ }
+        })
+       }
         console.log("error in merge file controler : ", err);
         return res.status(400).json({
             message: "something went wrong, make sure you send pdf files and they are not encrpted"

@@ -3,6 +3,7 @@ import fs from 'fs'
 import { encrypt_pdf_file, decrypt_pdf_file } from "../utils/encrpt_decrpt_pdf.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import isPdfLocked from "../utils/is_pdf_locked.js"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,7 +38,13 @@ const encrypt_pdf = (req, res) => {
                 message: "pdf is required to performe opretation"
             })
         }
-
+const isLocked = await isPdfLocked(req.file.path);
+            if(isLocked) {
+                fs.unlinkSync(req.file.path)
+            return res.status(400).json({
+                message: "can't perfome action on locked pdf!"
+            })
+            }
         try {
             const lock_pdf = await encrypt_pdf_file(req.file.path, password);
             if (lock_pdf) {
@@ -109,7 +116,13 @@ const decrypt_pdf = (req,res) => {
                 message: "pdf is required to performe opretation"
             })
         }
-
+const isLocked = await isPdfLocked(req.file.path);
+            if(isLocked) {
+                fs.unlinkSync(req.file.path)
+            return res.status(400).json({
+                message: "can't perfome action on locked pdf!"
+            })
+            }
         try {
             const unlock_pdf = await decrypt_pdf_file(req.file.path, password);
             if (unlock_pdf) {
