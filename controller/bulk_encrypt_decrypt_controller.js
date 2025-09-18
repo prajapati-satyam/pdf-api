@@ -78,6 +78,11 @@ const bulk_pdf_encrypt = async (req, res) => {
                     fs.unlinkSync(zipPath);
                     console.log("locked zip deleted after sending");
                 }
+                req.files.forEach((file) => {
+        if(fs.existsSync(file)) {
+            fs.unlinkSync(file);
+        }
+    });
                 cleanupNeeded = false;
             })
             res.on("close", () => {
@@ -85,6 +90,12 @@ const bulk_pdf_encrypt = async (req, res) => {
                     fs.unlinkSync(zipPath);
                     console.log("Cleanup: zip deleted on request close");
                 }
+                req.files.forEach((file) => {
+        if(fs.existsSync(file)) {
+            fs.unlinkSync(file);
+        }
+    });
+
             });
 
         } catch (err) {
@@ -96,18 +107,15 @@ if (fs.existsSync(zipPath) && cleanupNeeded) {
   fs.unlinkSync(zipPath);
   console.log("Cleanup: leftover zip deleted in finally");
 }
+req.files.forEach((file) => {
+        if(fs.existsSync(file)) {
+            fs.unlinkSync(file);
+        }
+    });
             return res.json({
                 message: err.message
             })
         }
-    req.files.forEach((file) => {
-        if(fs.existsSync(file)) {
-            fs.unlinkSync(file);
-            return true;
-        } else {
-            return true
-        }
-    });
 
     })
 }

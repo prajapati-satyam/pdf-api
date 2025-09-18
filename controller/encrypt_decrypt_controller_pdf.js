@@ -118,7 +118,7 @@ const decrypt_pdf = (req,res) => {
         }
         try {
             const unlock_pdf = await decrypt_pdf_file(req.file.path, password);
-            if (unlock_pdf === true) {
+            if (unlock_pdf.success === true) {
                 return res.download(path.join(__dirname ,'../tmp/decrypt', req.file.filename), 'unlocked.pdf',(err) => {
                     // delete original file
                     console.log("original file deleted starting : ");

@@ -38,10 +38,10 @@ async function decrypt_pdf_file(pdfFilePath, password) {
    try {
 
      await decrypt(pdf);
-     return true;
+     return {success: true};
    } catch (err) {
       console.log("unable to decrypt pdf : ", err);
-      return false
+      return {success: false}
    }
 }
 

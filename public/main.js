@@ -398,6 +398,7 @@ class PDFCryptoPro {
             return;
         }
 
+
         this.setLoadingState(true);
         this.showProgressSection();
         
@@ -449,8 +450,14 @@ class PDFCryptoPro {
 
         this.updateProgress(90, 'Preparing download...');
 
-        // Handle file download
+        // Handle file download with validation
         const blob = await response.blob();
+        
+        // Validate response content
+        if (!this.validateResponseBlob(blob, 'pdf')) {
+            throw new Error('Invalid Password');
+        }
+
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         
@@ -509,8 +516,14 @@ class PDFCryptoPro {
 
         this.updateProgress(85, 'Preparing ZIP download...');
 
-        // Handle ZIP file download
+        // Handle ZIP file download with validation
         const blob = await response.blob();
+        
+        // Validate response content
+        if (!this.validateResponseBlob(blob, 'zip')) {
+            throw new Error('Server returned invalid ZIP file or error response');
+        }
+
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         
@@ -529,20 +542,50 @@ class PDFCryptoPro {
         this.showResetButton();
     }
 
-    validateFile(file) {
-        if (file.type !== 'application/pdf') {
-            return { valid: false, message: 'Only PDF files are supported' };
+    validateResponseBlob(blob, expectedType) {
+        // Check if blob is empty
+        if (!blob || blob.size === 0) {
+            console.error('Received empty blob from server');
+            return false;
         }
 
-        if (file.size > this.maxSingleFileSize) {
-            return { valid: false, message: `File size must be less than ${this.formatFileSize(this.maxSingleFileSize)}` };
+        // Check content type
+        const contentType = blob.type.toLowerCase();
+        
+        if (expectedType === 'pdf') {
+            // Valid PDF content types
+            const validPdfTypes = ['application/pdf'];
+            if (!validPdfTypes.includes(contentType)) {
+                console.error('Invalid content type for PDF:', contentType);
+                // Try to check if it's a JSON error response
+                this.checkForJsonError(blob);
+                return false;
+            }
+        } else if (expectedType === 'zip') {
+            // Valid ZIP content types
+            const validZipTypes = ['application/zip', 'application/x-zip-compressed', 'application/octet-stream'];
+            if (!validZipTypes.includes(contentType)) {
+                console.error('Invalid content type for ZIP:', contentType);
+                // Try to check if it's a JSON error response
+                this.checkForJsonError(blob);
+                return false;
+            }
         }
 
-        if (file.size === 0) {
-            return { valid: false, message: 'File appears to be empty' };
-        }
+        return true;
+    }
 
-        return { valid: true };
+    async checkForJsonError(blob) {
+        try {
+            const text = await blob.text();
+            const errorData = JSON.parse(text);
+            if (errorData.message) {
+                throw new Error(errorData.message);
+            }
+        } catch (parseError) {
+            // If it's not JSON, it might be some other error format
+            console.error('Server returned unexpected content type and format');
+        }
     }
 
     addInvalidFileEffect(elementId) {
