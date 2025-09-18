@@ -116,13 +116,6 @@ const decrypt_pdf = (req,res) => {
                 message: "pdf is required to performe opretation"
             })
         }
-const isLocked = await isPdfLocked(req.file.path);
-            if(isLocked) {
-                fs.unlinkSync(req.file.path)
-            return res.status(400).json({
-                message: "can't perfome action on locked pdf!"
-            })
-            }
         try {
             const unlock_pdf = await decrypt_pdf_file(req.file.path, password);
             if (unlock_pdf) {
