@@ -40,7 +40,7 @@ async function decrypt_pdf_file(pdfFilePath, password) {
      await decrypt(pdf);
      return true;
    } catch (err) {
-      console.log("unable to decrypt pdf : ", err.message);
+      console.log("unable to decrypt pdf : ", err);
       return false
    }
 }

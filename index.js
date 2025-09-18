@@ -1,5 +1,6 @@
 import express from 'express';
 import router_api_v1 from './routes/api_v1.js';
+import path from 'path';
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -11,7 +12,7 @@ app.use(express.static('public'));
 app.use('/api/v1', router_api_v1);
 
 app.get('/', (req, res) => {
-    res.send('<h1>hello from express js</h1>');
+    res.sendFile(path.join('./', 'public', 'bolt.html'));
 });
 
 

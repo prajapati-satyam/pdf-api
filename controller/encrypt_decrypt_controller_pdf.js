@@ -118,7 +118,7 @@ const decrypt_pdf = (req,res) => {
         }
         try {
             const unlock_pdf = await decrypt_pdf_file(req.file.path, password);
-            if (unlock_pdf) {
+            if (unlock_pdf === true) {
                 return res.download(path.join(__dirname ,'../tmp/decrypt', req.file.filename), 'unlocked.pdf',(err) => {
                     // delete original file
                     console.log("original file deleted starting : ");
@@ -135,7 +135,7 @@ const decrypt_pdf = (req,res) => {
                    fs.unlinkSync(req.file.path);
                    console.log("original file deleted");
                    res.json({
-                    message: "uanble to unlock your pdf , try again"
+                    message: "Wrong Password"
                    })
             }
 
