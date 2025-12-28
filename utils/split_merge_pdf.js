@@ -1,5 +1,7 @@
+import { rejects } from "assert";
+import { error } from "console";
 import fs, { mkdtempSync } from "fs";
-import path from "path";
+import path, { resolve } from "path";
 import { PDFDocument } from "pdf-lib";
 import { zip, COMPRESSION_LEVEL } from 'zip-a-folder';
 
@@ -104,8 +106,22 @@ async function merge_pdf(pdfpaths) {
   let pdfBytesLoad = [];
   // buffer data of pdf
   for (let i = 0; i < pdfpaths.length; i++) {
-    const existingPdfBytes = fs.readFileSync(pdfpaths[i]);
-    pdfBytesLoad.push(existingPdfBytes);
+    let chunks = [];
+    await new Promise((resolve, reject) => {
+      const stream = fs.createReadStream(pdfpaths[i]);
+      stream.on('data', (chunk) => {
+       chunks.push(chunk)
+      })
+      stream.on('end', () => {
+        pdfBytesLoad.push(Buffer.concat(chunks));
+        resolve();
+      })
+      stream.on("error", () => {
+        reject("err in stream");
+        console.log("unable to process stram in merge_pdf");
+        process.exit(1);
+      })
+    })
   }
   console.log("length of pdf bytes load : ", pdfBytesLoad.length);
   // console.log("data of pdf bytes load : ", pdfBytesLoad);
