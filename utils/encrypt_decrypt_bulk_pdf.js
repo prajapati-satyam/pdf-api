@@ -23,4 +23,23 @@ async function encrypt_pdf_file_bulk(pdfFilePath, password, outputFoldername) {
 }
 
 
+export async function decrypt_pdf_file_bulk(pdfFilePath, passoword, outputFoldername) {
+    if (!pdfFilePath || !passoword || !outputFoldername) {
+      throw new Error("All three paramrets are required");
+    }
+    const file_name = path.basename(pdfFilePath);
+    const pdf = {
+      input: pdfFilePath,
+      output: `./${outputFoldername}/${file_name}`,
+      passoword: passoword
+    }
+    try {
+      await decrypt(pdf);
+    } catch (err) {
+         console.log("unable to unlock pdf ", err.message);
+         return false;
+    }
+}
+
+
 export default encrypt_pdf_file_bulk;
