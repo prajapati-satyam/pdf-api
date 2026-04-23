@@ -1,0 +1,28 @@
+name: Deploy Pdf app to DigitalOcean
+
+on:
+    push:
+        branches:
+            - main
+
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v4
+
+
+            - name: deploy via ssh
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                host: ${{secrets.SSH_HOST}}
+                username: root
+                password: ${{secrets.SSH_PASSWORD}}
+                script: |
+                  cd pdf-api
+                  git pull
+                  npm i
+                  pm2 restart index

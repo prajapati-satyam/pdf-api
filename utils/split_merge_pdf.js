@@ -38,6 +38,7 @@ async function split_pdf(inputpath, range, pagenumbers, allpagesplit) {
   }
 
   // for if user give range of two numbers
+  // push all range numbers in array
   if (range && range.length === 2 && range[0] < range[1] && range[1] > range[0]) {
     let page_count2 = [];
     while (range[0] <= range[1]) {

@@ -38,7 +38,7 @@ const encrypt_pdf = (req, res) => {
                 message: "pdf is required to performe opretation"
             })
         }
-const isLocked = await isPdfLocked(req.file.path);
+    const isLocked = await isPdfLocked(req.file.path);
             if(isLocked) {
                 fs.unlinkSync(req.file.path)
             return res.status(400).json({
