@@ -1,13 +1,7 @@
-git rm --cached *.html
-git rm --cached *.css
-git rm --cached *.js
-*.html
-!index.html
-node_modules
-*.css
-!style.css
-*.js
-!script.js
+public/*
+!public/index.html
+!public/style.css
+!public/script.js
 jpgtopdf.js
 .pdf
 .zip# Logs
