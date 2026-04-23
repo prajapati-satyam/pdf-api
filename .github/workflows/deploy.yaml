@@ -22,6 +22,9 @@ jobs:
                 username: root
                 password: ${{secrets.SSH_PASSWORD}}
                 script: |
+                  # Load NVM so node/npm/pm2 work
+                  export NVM_DIR="/root/.nvm"
+                  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
                   cd pdf-api
                   git pull
                   npm i
