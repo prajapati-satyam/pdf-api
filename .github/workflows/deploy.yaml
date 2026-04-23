@@ -28,4 +28,4 @@ jobs:
                   cd pdf-api
                   git pull
                   npm i
-                  pm2 restart index
+                  pm2 reload index

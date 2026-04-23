@@ -3,7 +3,7 @@ import router_api_v1 from './routes/api_v1.js';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
