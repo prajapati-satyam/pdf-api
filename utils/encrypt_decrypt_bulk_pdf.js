@@ -1,5 +1,6 @@
 import { encrypt , decrypt} from "node-qpdf2";
 import path from 'path'
+import fs from 'fs'
 
 async function encrypt_pdf_file_bulk(pdfFilePath, password, outputFoldername) {
   if (!pdfFilePath || !password || !outputFoldername) {
@@ -23,21 +24,34 @@ async function encrypt_pdf_file_bulk(pdfFilePath, password, outputFoldername) {
 }
 
 
-export async function decrypt_pdf_file_bulk(pdfFilePath, passoword, outputFoldername) {
-    if (!pdfFilePath || !passoword || !outputFoldername) {
-      throw new Error("All three paramrets are required");
+export async function decrypt_pdf_file_bulk(pdfFilePath, password, outputFoldername) {
+    if (!pdfFilePath || !password || !outputFoldername) {
+        throw new Error("All parameters are required");
     }
+
     const file_name = path.basename(pdfFilePath);
+
     const pdf = {
-      input: pdfFilePath,
-      output: `./${outputFoldername}/${file_name}`,
-      passoword: passoword
-    }
+        input: pdfFilePath,
+        output: `./${outputFoldername}/${file_name}`,
+        password: password
+    };
+
     try {
-      await decrypt(pdf);
+        await decrypt(pdf);
+
+        // IMPORTANT: confirm file exists
+        if (!fs.existsSync(pdf.output)) {
+            throw new Error("Decryption failed: output file not created");
+        }
+
+        return true;
+
     } catch (err) {
-         console.log("unable to unlock pdf ", err.message);
-         return false;
+        console.log("Unable to unlock PDF:", err.message);
+
+        //  THROW instead of return
+        throw new Error("Invalid password or corrupted PDF");
     }
 }
 
