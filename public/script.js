@@ -271,7 +271,7 @@ init() {
         // Save or update
         const name = document.getElementById('cred-name').value.trim();
         const dob = document.getElementById('cred-dob').value.trim();
-        if(!name || !dob) return this.showToast('error', 'Missing Data', 'Please enter Name and DOB.');
+        if(!name || !dob  || name.length < 4) return this.showToast('error', 'Missing Data', 'Please enter Name and DOB.');
 
         const endpoint = localStorage.getItem('info') ? '/api/v1/change-cookies' : '/api/v1/set-cookies';
         try {
@@ -363,24 +363,72 @@ init() {
         await this.handleResponseDownload(res, 'pdf');
     }
 
-    async doAadhaarAPI() {
-        const useCred = document.getElementById('aadhaar-use-cred').checked;
-        const headers = { default: useCred ? 'true' : 'false' };
+    // async doAadhaarAPI() {
+    //     const hasInfo = localStorage.getItem('info') === 'true';
+    //     const checkbox = document.getElementById('aadhaar-use-cred');
+    //     const useCred = hasInfo && checkbox.checked;
+    //     const headers = { default: useCred ? 'true' : 'false' };
 
-        if (useCred) {
-            headers['password'] = '';
-        } else {
-            const pwd = document.getElementById('aadhaar-custom-pwd').value.toUpperCase();
-            if(!/^[A-Z]{4}\d{4}$/.test(pwd)) throw new Error("Password must be exactly 4 letters followed by 4 numbers");
-            headers['password'] = pwd;
+    //     if (useCred) {
+    //         headers['password'] = '';
+    //     } else {
+    //         const pwd = document.getElementById('aadhaar-custom-pwd').value.toUpperCase();
+    //         if(!/^[A-Z]{4}\d{4}$/.test(pwd)) throw new Error("Password must be exactly 4 letters followed by 4 numbers");
+    //         headers['password'] = pwd;
+    //     }
+
+    //     const fd = new FormData();
+    //     fd.append('test', this.selectedFiles[0]);
+
+    //     const res = await fetch('/api/v1/upload/unlock/adhar', { method: 'POST', headers, body: fd });
+    //     await this.handleResponseDownload(res, 'pdf');
+    // }
+    async doAadhaarAPI() {
+    const hasInfo = localStorage.getItem('info') === 'true';
+
+    const checkbox = document.getElementById('aadhaar-use-cred');
+    const pwdInputEl = document.getElementById('aadhaar-custom-pwd');
+
+    if (!checkbox || !pwdInputEl) {
+        throw new Error("UI error: Required elements not found");
+    }
+
+    // Critical: trust actual state, not just checkbox
+    const useCred = hasInfo && checkbox.checked;
+
+    const headers = {
+        default: useCred ? 'true' : 'false'
+    };
+
+    if (useCred) {
+        headers['password'] = '';
+    } else {
+        const rawPwd = pwdInputEl.value.trim();
+
+        if (!rawPwd) {
+            throw new Error("Please enter password");
         }
 
-        const fd = new FormData();
-        fd.append('test', this.selectedFiles[0]);
+        const pwd = rawPwd.toUpperCase();
 
-        const res = await fetch('/api/v1/upload/unlock/adhar', { method: 'POST', headers, body: fd });
-        await this.handleResponseDownload(res, 'pdf');
+        if (!/^[A-Z]{4}\d{4}$/.test(pwd)) {
+            throw new Error("Password must be exactly 4 letters followed by 4 numbers");
+        }
+
+        headers['password'] = pwd;
     }
+
+    const fd = new FormData();
+    fd.append('test', this.selectedFiles[0]);
+
+    const res = await fetch('/api/v1/upload/unlock/adhar', {
+        method: 'POST',
+        headers,
+        body: fd
+    });
+
+    await this.handleResponseDownload(res, 'pdf');
+}
 
     // Common file downloader
     async handleResponseDownload(response, type) {
