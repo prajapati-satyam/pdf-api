@@ -80,8 +80,8 @@ const bulk_pdf_encrypt = async (req, res) => {
                     console.log("locked zip deleted after sending");
                 }
                 req.files.forEach((file) => {
-                    if (fs.existsSync(file)) {
-                        fs.unlinkSync(file);
+                    if (fs.existsSync(file.path)) {
+                        fs.unlinkSync(file.path);
                     }
                 });
                 cleanupNeeded = false;
@@ -92,8 +92,8 @@ const bulk_pdf_encrypt = async (req, res) => {
                     console.log("Cleanup: zip deleted on request close");
                 }
                 req.files.forEach((file) => {
-                    if (fs.existsSync(file)) {
-                        fs.unlinkSync(file);
+                    if (fs.existsSync(file.path)) {
+                        fs.unlinkSync(file.path);
                     }
                 });
 
@@ -109,8 +109,8 @@ const bulk_pdf_encrypt = async (req, res) => {
                 console.log("Cleanup: leftover zip deleted in finally");
             }
             req.files.forEach((file) => {
-                if (fs.existsSync(file)) {
-                    fs.unlinkSync(file);
+                if (fs.existsSync(file.path)) {
+                    fs.unlinkSync(file.path);
                 }
             });
             return res.json({
@@ -184,15 +184,15 @@ export const bulk_pdf_decrypt = async (req, res) => {
                     console.log('unlocked zip file deleted');
                 }
                 req.files.forEach((file) => {
-                    if (fs.existsSync(file)) {
-                        fs.unlinkSync(file)
+                    if (fs.existsSync(file.path)) {
+                        fs.unlinkSync(file.path)
                     }
                 })
                 cleanupNeeded = false
                })
                res.on('close', ()=> {
                 if (fs.existsSync(`${random_dir}`)) {
-                    fs.rmSync(random_dir);
+                    fs.rmSync(random_dir, {force: true, recursive: true});
                     console.log("delete random folder raw files");
                 }
                 if (cleanupNeeded && fs.existsSync(`${random_dir}.zip`)) {
@@ -200,21 +200,21 @@ export const bulk_pdf_decrypt = async (req, res) => {
                     console.log("clean left over zip file");
                 }
                 req.files.map((file)=> {
-                    if (fs.existsSync(file)) {
-                     fs.unlinkSync(file)
+                    if (fs.existsSync(file.path)) {
+                     fs.unlinkSync(file.path)
                     }
                 })
                })
         } catch (err) {
             if (fs.existsSync(random_dir)) {
-                  fs.rmSync(random_dir);
+                  fs.rmSync(random_dir, {force: true, recursive: true});
             }
-            if (zipPath && cleanupNeeded) {
+            if (zipPath && cleanupNeeded && fs.existsSync(zipPath)) {
                 fs.unlinkSync(zipPath);
             }
             req.files.map((file) => {
-                if (fs.existsSync(file)) {
-                     fs.unlinkSync(file)
+                if (fs.existsSync(file.path)) {
+                     fs.unlinkSync(file.path)
                 }
             })
             return res.json({

@@ -47,6 +47,7 @@ const encrypt_pdf = (req, res) => {
             }
         try {
             const lock_pdf = await encrypt_pdf_file(req.file.path, password);
+            console.log("I am locked pdf : ", lock_pdf);
             if (lock_pdf) {
                 return res.download(path.join(__dirname ,'../tmp/encrypt', req.file.filename), 'locked.pdf', (err) => {
                     if (err) {
@@ -65,6 +66,10 @@ const encrypt_pdf = (req, res) => {
                 // delete original file
                 console.log("error to lock pdf , so starting deleting original file")
                    fs.unlinkSync(req.file.path);
+                //    fs.unlinkSync(path.join(__dirname,'../tmp/encrypt', path.basename(req.file.path)));
+                   if (fs.existsSync(path.join(__dirname,'../tmp/encrypt', path.basename(req.file.path)))) {
+                    fs.unlinkSync(path.join(__dirname,'../tmp/encrypt', path.basename(req.file.path)))
+                   }
                    console.log("original file deleted");
                    res.json({
                     message: "uanble to lock your pdf , try again"
@@ -75,6 +80,9 @@ const encrypt_pdf = (req, res) => {
         } catch(err) {
             console.log("original file starting deleting due to error (catch block)");
             fs.unlinkSync(req.file.path);
+            if (fs.existsSync(path.join(__dirname,'../tmp/encrypt', path.basename(req.file.path)))) {
+                    fs.unlinkSync(path.join(__dirname,'../tmp/encrypt', path.basename(req.file.path)))
+            }
             console.log("original file deleted");
             console.log("error in encryptfile controller : ", err);
             console.log("error in encryptfile controller : ", err.message);
@@ -133,6 +141,9 @@ const decrypt_pdf = (req,res) => {
                 // delete original file
                 console.log("error to unlock pdf , so starting deleting original file")
                    fs.unlinkSync(req.file.path);
+                   if (fs.existsSync(path.join(__dirname,'../tmp/decrypt', path.basename(req.file.path)))) {
+                    fs.unlinkSync(path.join(__dirname,'../tmp/decrypt', path.basename(req.file.path)))
+            }
                    console.log("original file deleted");
                    res.json({
                     message: "Wrong Password"
@@ -143,6 +154,9 @@ const decrypt_pdf = (req,res) => {
         } catch(err) {
             console.log("original file starting deleting due to error (catch block)");
             fs.unlinkSync(req.file.path);
+            if (fs.existsSync(path.join(__dirname,'../tmp/decrypt', path.basename(req.file.path)))) {
+                    fs.unlinkSync(path.join(__dirname,'../tmp/decrypt', path.basename(req.file.path)))
+            }
             console.log("original file deleted");
             console.log("error in encryptfile controller : ", err);
             res.json({
