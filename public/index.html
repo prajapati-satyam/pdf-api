@@ -96,9 +96,17 @@
                     <h3 class="text-lg font-bold text-blue-400">Merge PDFs</h3>
                     <p class="text-xs text-gray-400 mt-1">Combine into one</p>
                 </button>
-                <button data-op="unlock-aadhaar" class="operation-card glass-card p-4 rounded-xl hover:scale-105 border border-pink-500/30 text-center col-span-2 md:col-span-2">
+                <!-- <button data-op="unlock-aadhaar" class="operation-card glass-card p-4 rounded-xl hover:scale-105 border border-pink-500/30 text-center col-span-2 md:col-span-2">
                     <h3 class="text-lg font-bold text-pink-400">Unlock Aadhaar PDF</h3>
                     <p class="text-xs text-gray-400 mt-1">Smart unlock using credentials or password</p>
+                </button> -->
+                <button data-op="unlock-aadhaar" class="operation-card glass-card p-4 rounded-xl hover:scale-105 border border-pink-500/30 text-center">
+                    <h3 class="text-lg font-bold text-pink-400">Unlock Aadhaar</h3>
+                    <p class="text-xs text-gray-400 mt-1">Smart PDF unlock</p>
+                </button>
+                <button data-op="unlock-xlsx" class="operation-card glass-card p-4 rounded-xl hover:scale-105 border border-emerald-500/30 text-center">
+                    <h3 class="text-lg font-bold text-emerald-400">Unlock Excel</h3>
+                    <p class="text-xs text-gray-400 mt-1">Remove XLSX lock</p>
                 </button>
             </div>
 
@@ -109,8 +117,10 @@
                 </div>
 
                 <div id="single-drop-zone" class="border-2 border-dashed border-gray-600 rounded-2xl p-8 md:p-12 text-center cursor-pointer hover:border-purple-400 hover:bg-purple-500/5 hidden">
-                    <h3 class="text-2xl font-semibold mb-2">Drop your PDF here</h3>
-                    <p class="text-gray-400">or click to browse • Ctrl+V to paste</p>
+                    <!-- <h3 class="text-2xl font-semibold mb-2">Drop your PDF here</h3>
+                    <p class="text-gray-400">or click to browse • Ctrl+V to paste</p> -->
+                    <h3 id="single-drop-title" class="text-2xl font-semibold mb-2">Drop your PDF here</h3>
+                    <p id="single-drop-desc" class="text-gray-400">or click to browse • Ctrl+V to paste</p>
                 </div>
 
                 <div id="bulk-drop-zone" class="border-2 border-dashed border-gray-600 rounded-2xl p-8 md:p-12 text-center cursor-pointer hover:border-cyan-400 hover:bg-cyan-500/5 hidden">
@@ -123,7 +133,10 @@
 
                 <div id="single-file-display" class="hidden mb-6 bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50 flex justify-between items-center">
                     <div class="flex items-center space-x-4">
-                        <div class="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center"><span class="font-bold">PDF</span></div>
+                        <!-- <div class="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center"><span class="font-bold">PDF</span></div> -->
+                         <div id="single-file-icon-bg" class="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center">
+                            <span id="single-file-icon-text" class="font-bold text-white">PDF</span>
+                        </div>
                         <div>
                             <p id="single-file-name" class="font-semibold"></p>
                             <p id="single-file-size" class="text-sm text-gray-400"></p>

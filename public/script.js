@@ -76,21 +76,46 @@ init() {
         document.getElementById('clear-cred-btn').addEventListener('click', () => this.handleCredentials('clear'));
 
         // Global Paste Event (Ctrl+V)
+        // document.addEventListener('paste', (e) => {
+        //     if(!this.currentOperation) return;
+        //     const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        //     const pdfFiles = [];
+        //     for (let index in items) {
+        //         const item = items[index];
+        //         if (item.kind === 'file' && item.type === 'application/pdf') {
+        //             pdfFiles.push(item.getAsFile());
+        //         }
+        //     }
+        //     if(pdfFiles.length > 0) {
+        //         if (['bulk-encrypt', 'bulk-decrypt', 'merge'].includes(this.currentOperation)) {
+        //             this.validateAndSetBulkFiles(pdfFiles);
+        //         } else {
+        //             this.validateAndSetSingleFile(pdfFiles[0]);
+        //         }
+        //     }
+        // });
+        // Global Paste Event (Ctrl+V)
         document.addEventListener('paste', (e) => {
             if(!this.currentOperation) return;
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            const pdfFiles = [];
+            const isXlsxOp = this.currentOperation === 'unlock-xlsx';
+            const validFiles = [];
             for (let index in items) {
                 const item = items[index];
-                if (item.kind === 'file' && item.type === 'application/pdf') {
-                    pdfFiles.push(item.getAsFile());
+                if (item.kind === 'file') {
+                    const file = item.getAsFile();
+                    if (isXlsxOp && file.name.toLowerCase().endsWith('.xlsx')) {
+                        validFiles.push(file);
+                    } else if (!isXlsxOp && file.type === 'application/pdf') {
+                        validFiles.push(file);
+                    }
                 }
             }
-            if(pdfFiles.length > 0) {
+            if(validFiles.length > 0) {
                 if (['bulk-encrypt', 'bulk-decrypt', 'merge'].includes(this.currentOperation)) {
-                    this.validateAndSetBulkFiles(pdfFiles);
+                    this.validateAndSetBulkFiles(validFiles);
                 } else {
-                    this.validateAndSetSingleFile(pdfFiles[0]);
+                    this.validateAndSetSingleFile(validFiles[0]);
                 }
             }
         });
@@ -104,12 +129,31 @@ init() {
         document.querySelectorAll('.operation-card').forEach(card => card.classList.remove('active-op'));
         if(buttonElement) buttonElement.classList.add('active-op');
 
+        // const titleMap = {
+        //     'encrypt': 'Encrypt PDF', 'decrypt': 'Decrypt PDF', 'bulk-encrypt': 'Bulk Encrypt',
+        //     'bulk-decrypt': 'Bulk Decrypt', 'split': 'Split PDF', 'merge': 'Merge PDFs', 'unlock-aadhaar': 'Unlock Aadhaar'
+        // };
+        // document.getElementById('interface-title').textContent = titleMap[op];
+        // document.getElementById('interface-subtitle').textContent = "Upload file(s) to continue";
         const titleMap = {
             'encrypt': 'Encrypt PDF', 'decrypt': 'Decrypt PDF', 'bulk-encrypt': 'Bulk Encrypt',
-            'bulk-decrypt': 'Bulk Decrypt', 'split': 'Split PDF', 'merge': 'Merge PDFs', 'unlock-aadhaar': 'Unlock Aadhaar'
+            'bulk-decrypt': 'Bulk Decrypt', 'split': 'Split PDF', 'merge': 'Merge PDFs', 
+            'unlock-aadhaar': 'Unlock Aadhaar', 'unlock-xlsx': 'Unlock Excel (XLSX)'
         };
         document.getElementById('interface-title').textContent = titleMap[op];
         document.getElementById('interface-subtitle').textContent = "Upload file(s) to continue";
+
+        // Handle XLSX specific text and input acceptance
+        const singleInput = document.getElementById('single-file-input');
+        const dropTitle = document.getElementById('single-drop-title');
+        
+        if (op === 'unlock-xlsx') {
+            singleInput.accept = '.xlsx';
+            dropTitle.textContent = 'Drop your XLSX here';
+        } else {
+            singleInput.accept = '.pdf';
+            dropTitle.textContent = 'Drop your PDF here';
+        }
 
         // Show/Hide relevant drop zones
         const isBulk = ['bulk-encrypt', 'bulk-decrypt', 'merge'].includes(op);
@@ -127,11 +171,38 @@ init() {
         else this.validateAndSetBulkFiles(Array.from(e.target.files));
     }
 
+    // validateAndSetSingleFile(file) {
+    //     if (!file || file.type !== 'application/pdf') return this.showToast('error', 'Invalid', 'Only PDF files allowed');
+    //     this.selectedFiles = [file];
+    //     document.getElementById('single-file-name').textContent = file.name;
+    //     document.getElementById('single-file-size').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+    //     document.getElementById('single-drop-zone').classList.add('hidden');
+    //     document.getElementById('single-file-display').classList.remove('hidden');
+    //     this.showOptions();
+    // }
     validateAndSetSingleFile(file) {
-        if (!file || file.type !== 'application/pdf') return this.showToast('error', 'Invalid', 'Only PDF files allowed');
+        const isXlsxOp = this.currentOperation === 'unlock-xlsx';
+        const expectedExt = isXlsxOp ? '.xlsx' : '.pdf';
+
+        if (!file || !file.name.toLowerCase().endsWith(expectedExt)) {
+            return this.showToast('error', 'Invalid', `Only ${expectedExt.toUpperCase()} files allowed`);
+        }
+
         this.selectedFiles = [file];
         document.getElementById('single-file-name').textContent = file.name;
         document.getElementById('single-file-size').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+        
+        // Dynamically change logo based on file type
+        const iconBg = document.getElementById('single-file-icon-bg');
+        const iconText = document.getElementById('single-file-icon-text');
+        if (isXlsxOp) {
+            iconBg.className = 'w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center';
+            iconText.textContent = 'XLSX';
+        } else {
+            iconBg.className = 'w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center';
+            iconText.textContent = 'PDF';
+        }
+
         document.getElementById('single-drop-zone').classList.add('hidden');
         document.getElementById('single-file-display').classList.remove('hidden');
         this.showOptions();
@@ -309,6 +380,7 @@ init() {
                 case 'split': await this.doSplitAPI(); break;
                 case 'merge': await this.doMergeAPI(); break;
                 case 'unlock-aadhaar': await this.doAadhaarAPI(); break;
+                case 'unlock-xlsx': await this.doXlsxAPI(); break;
             }
             this.showToast('success', 'Success', 'Processing completed successfully.');
             document.getElementById('reset-btn').classList.remove('hidden');
@@ -429,6 +501,13 @@ init() {
 
     await this.handleResponseDownload(res, 'pdf');
 }
+async doXlsxAPI() {
+        const fd = new FormData();
+        fd.append('test', this.selectedFiles[0]);
+        // No password headers needed for XLSX
+        const res = await fetch('/api/v1/upload/unlock/xlsx', { method: 'POST', body: fd });
+        await this.handleResponseDownload(res, 'xlsx');
+    }
 
     // Common file downloader
     async handleResponseDownload(response, type) {
@@ -447,7 +526,14 @@ init() {
         a.href = url;
         // console.log(new Date().toTimeString());
         const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-        a.download = type === 'zip' ? `processed_${timestamp}.zip` : `processed_${timestamp}.pdf`;
+        if (type === 'zip') {
+            a.download = `processed_${timestamp}.zip`;
+        } else if (type === 'xlsx') {
+            a.download = `unlocked_${timestamp}.xlsx`;
+        } else {
+            a.download = `processed_${timestamp}.pdf`;
+        }
+        // a.download = type === 'zip' ? `processed_${timestamp}.zip` : `processed_${timestamp}.pdf`;
         // a.download = type === 'zip' ? `${filenamearr3}_${new Date().toDateString()}.zip` : `${filenamearr3}${new Date().toDateString()}.pdf`;
         document.body.appendChild(a);
         a.click();
