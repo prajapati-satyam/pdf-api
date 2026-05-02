@@ -8,6 +8,7 @@ import set_cookies from '../controller/set_cookies.controller.js';
 import get_user_info_cookies from '../middleware/getuserinfo.middleware.js';
 import clear_cookies from '../controller/clear_cookies.controller.js';
 import { unlock_adhar } from '../controller/unlock_adhar.controller.js';
+import unlock_xlsx from '../controller/unlock_xlsx.controller.js'
 
 const router_api_v1 = express.Router();
 
@@ -20,6 +21,9 @@ router_api_v1.post('/upload/merge', merge_pdf_controller);
 
 //adhar card unlocked route
 router_api_v1.post('/upload/unlock/adhar', get_user_info_cookies, unlock_adhar);
+
+// xlsx unlocked
+router_api_v1.post('/upload/unlock/xlsx', unlock_xlsx)
 
 //set cookies and store user info using jwt
 router_api_v1.post('/set-cookies', set_cookies);

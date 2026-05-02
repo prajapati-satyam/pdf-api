@@ -23,10 +23,10 @@ const file_filter = (req, file, cb) => {
 
 }
 
-const upload_xlsx = multer({
+const upload_xlsx_file = multer({
   storage: storage,
   fileFilter: file_filter,
   limits: {fileSize: 100 * 1024 * 1024}
 })
 
-export default upload_xlsx;
+export default upload_xlsx_file;

@@ -70,7 +70,7 @@ const password = isUseDefualtPassword ? default_password : custom_password;
         console.log(default_password);
         const decrypt_pdf = await decrypt_pdf_file(req.file.path, password);
         if (decrypt_pdf.success) {
-            res.download(path.join(__dirname, '../tmp/decrypt', req.file.filename), `${downlaod_filename}.pdf` , (err)=> {
+            res.status(200).download(path.join(__dirname, '../tmp/decrypt', req.file.filename), `${downlaod_filename}.pdf` , (err)=> {
                if(err) {
                 console.log("error in adhar card unlocked controller while send downlaod res to user : ", err);
                }

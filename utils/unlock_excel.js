@@ -1,10 +1,15 @@
-const fs = require('fs');
-const JSZip = require('jszip');
-const path = require('path');
+import fs from 'fs';
+import JSZip from 'jszip';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const excelWorksheetRegex = /^xl\/worksheets\/.*\.xml$/;
 
-async function unlock_xlsl_file(filepath) {
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export async function unlock_xlsx_file(filepath) {
     if (!typeof filepath === 'string') {
         return new Error("File path must be string")
     }
@@ -35,7 +40,17 @@ async function unlock_xlsl_file(filepath) {
 
         // Generate ZIP ONCE
         const content = await outputZip.generateAsync({ type: 'nodebuffer' });
-        fs.writeFileSync(`${filename_arr[0]} no-password.xlsx`, content);
+        fs.writeFileSync(path.join(__dirname,`../tmp/xlsx_unlocked/${filename_arr[0]} no-password.xlsx`), content);
+        // delete orignial file also
+        if (fs.existsSync(filepath)) {
+             fs.unlinkSync(filepath);
+        }
+        const obj = {
+            success : true,
+            path: `../tmp/xlsx_unlocked/${filename_arr[0]} no-password.xlsx`,
+            filename: `${filename_arr[0]}+ no-password`
+        }
+        return obj
 
         // console.log("Password removed successfully!");
     } catch (err) {
@@ -43,9 +58,9 @@ async function unlock_xlsl_file(filepath) {
              fs.unlinkSync(filepath);
         }
         console.log("Error while unlocking file :", err);
+        const obj = {
+            success: false
+        }
+        return obj
     }
 }
-
-
-
-module.exports = { unlock_xlsl_file }

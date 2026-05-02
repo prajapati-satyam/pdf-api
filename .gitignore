@@ -4,6 +4,7 @@ public/*
 !public/script.js
 jpgtopdf.js
 .pdf
+.xlsx
 .zip# Logs
 logs
 *.log

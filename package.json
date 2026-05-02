@@ -16,9 +16,15 @@
     "dotenv": "^17.4.1",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.3",
+    "jszip": "^3.10.1",
     "multer": "^2.0.2",
     "node-qpdf2": "^6.0.0",
     "pdf-lib": "^1.17.1",
     "zip-a-folder": "^3.1.9"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^25.6.0"
   }
 }
