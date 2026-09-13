@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export async function unlock_xlsx_file(filepath) {
-    if (!typeof filepath === 'string') {
+    if (!typeof filepath !== 'string') {
         return new Error("File path must be string")
     }
     if (!fs.existsSync(filepath)) {
