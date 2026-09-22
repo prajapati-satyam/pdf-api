@@ -2,6 +2,9 @@ public/*
 !public/index.html
 !public/style.css
 !public/script.js
+!public/pdfLogo.webp
+!public/pdf-api-img.webp
+!public/pdf-api-img.png
 jpgtopdf.js
 .pdf
 .xlsx
